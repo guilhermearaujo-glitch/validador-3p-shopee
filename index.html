@@ -270,7 +270,11 @@
     <div class="grid-2" style="margin-bottom:14px;">
       <div class="field">
         <label>Nome do Produto</label>
-        <input type="text" id="nomeProduto" placeholder="Ex: Kit 3 Calcinhas Algodão" oninput="calcular()">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="nomeProduto" placeholder="Ex: Kit 3 Calcinhas Algodão" oninput="calcular()" style="flex:1;">
+          <button onclick="buscarNaShopee()" title="Buscar concorrentes na Shopee" style="background:#ee4d2d;color:white;border:none;border-radius:8px;padding:10px 14px;cursor:pointer;font-size:1rem;white-space:nowrap;flex-shrink:0;">🔍 Buscar na Shopee</button>
+        </div>
+        <div class="hint">Preencha o nome e clique para ver os concorrentes</div>
       </div>
       <div class="field">
         <label>Fornecedor</label>
@@ -735,6 +739,19 @@ function exportarHistorico() {
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url; a.download = 'validador3p_historico.csv'; a.click();
+}
+
+// ─── BUSCAR NA SHOPEE ─────────────────────────────────────────────
+function buscarNaShopee() {
+  const nome = document.getElementById('nomeProduto').value.trim();
+  if (!nome) {
+    alert('Preencha o nome do produto antes de buscar.');
+    document.getElementById('nomeProduto').focus();
+    return;
+  }
+  const query = encodeURIComponent(nome);
+  const url = `https://shopee.com.br/search?keyword=${query}&sortBy=sales`;
+  window.open(url, '_blank');
 }
 
 // ─── LIMPAR ───────────────────────────────────────────────────────
