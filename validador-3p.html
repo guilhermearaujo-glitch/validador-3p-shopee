@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Validador 3P — Método Vivendo da Shopee</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7;
+    color: #1a1a2e;
+    min-height: 100vh;
+  }
+
+  header {
+    background: #ee4d2d;
+    color: white;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(238,77,45,0.3);
+  }
+  header h1 { font-size: 1.3rem; font-weight: 700; }
+  header span { font-size: 0.85rem; opacity: 0.85; }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  .card h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ee4d2d;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  input[type="text"], input[type="number"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: border 0.2s;
+    background: #fafafa;
+  }
+  input:focus { outline: none; border-color: #ee4d2d; background: white; }
+
+  .field { margin-bottom: 4px; }
+
+  /* Concorrentes */
+  .competitor-row {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 1.2fr 1fr;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 10px;
+  }
+  .competitor-label {
+    font-size: 0.72rem;
+    color: #888;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+  }
+
+  /* Variações */
+  .variacoes-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+  .variacoes-table th {
+    background: #f8f8f8;
+    padding: 9px 12px;
+    text-align: left;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #777;
+    border-bottom: 1px solid #eee;
+  }
+  .variacoes-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .variacoes-table tr:last-child td { border-bottom: none; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+  .badge-ok { background: #e6f9f0; color: #1a9e5c; }
+  .badge-warn { background: #fff3e0; color: #e67e00; }
+  .badge-fail { background: #fdecea; color: #d32f2f; }
+
+  /* Score */
+  .score-box {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .score-circle {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 800;
+    flex-shrink: 0;
+    border: 4px solid #eee;
+    transition: all 0.4s;
+  }
+  .score-circle small { font-size: 0.65rem; font-weight: 600; color: #999; }
+
+  .criterios-list { flex: 1; min-width: 200px; }
+  .criterio-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: 0.88rem;
+    color: #444;
+  }
+  .criterio-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .veredicto {
+    margin-top: 16px;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.3px;
+  }
+  .veredicto-aprovado { background: #e6f9f0; color: #1a9e5c; border: 2px solid #a8e6cf; }
+  .veredicto-atencao { background: #fff8e1; color: #e67e00; border: 2px solid #ffe082; }
+  .veredicto-reprovado { background: #fdecea; color: #d32f2f; border: 2px solid #f5c6cb; }
+  .veredicto-neutro { background: #f5f5f5; color: #999; border: 2px solid #e0e0e0; }
+
+  /* Botões */
+  .btn {
+    padding: 11px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: #ee4d2d; color: white; }
+  .btn-primary:hover { background: #d73f22; }
+  .btn-secondary { background: #f0f0f0; color: #444; }
+  .btn-secondary:hover { background: #e0e0e0; }
+  .btn-ghost { background: transparent; color: #ee4d2d; border: 1.5px solid #ee4d2d; }
+  .btn-ghost:hover { background: #fff0ed; }
+
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+
+  /* Histórico */
+  .historico-vazio {
+    text-align: center;
+    color: #bbb;
+    font-size: 0.9rem;
+    padding: 28px 0;
+  }
+
+  .hist-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .hist-item:last-child { border-bottom: none; }
+  .hist-nome { font-weight: 600; font-size: 0.93rem; flex: 1; }
+  .hist-meta { font-size: 0.78rem; color: #888; }
+  .hist-score {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+  .hist-btn-del {
+    background: none;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px;
+    transition: color 0.2s;
+  }
+  .hist-btn-del:hover { color: #ee4d2d; }
+
+  .section-title {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #aaa;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+  }
+
+  .hint {
+    font-size: 0.78rem;
+    color: #aaa;
+    margin-top: 5px;
+  }
+
+  @media (max-width: 600px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .competitor-row { grid-template-columns: 1fr 1fr; }
+    .score-box { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🛍️ Validador 3P</h1>
+    <span>Método Vivendo da Shopee — Sistema P1 + P2 + Score</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- P1: Produto + Demanda -->
+  <div class="card">
+    <h2>📦 P1 — Produto & Demanda</h2>
+    <div class="grid-2" style="margin-bottom:14px;">
+      <div class="field">
+        <label>Nome do Produto</label>
+        <input type="text" id="nomeProduto" placeholder="Ex: Kit 3 Calcinhas Algodão" oninput="calcular()">
+      </div>
+      <div class="field">
+        <label>Fornecedor</label>
+        <input type="text" id="nomeFornecedor" placeholder="Ex: Tia / Pai / Comunidade Zé" oninput="calcular()">
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="field">
+        <label>Vendas/mês — melhor concorrente</label>
+        <input type="number" id="vendasMes" placeholder="Ex: 850" min="0" oninput="calcular()">
+        <div class="hint">Mínimo 300 para aprovar (P1)</div>
+      </div>
+      <div class="field">
+        <label>Tendência</label>
+        <select id="tendencia" onchange="calcular()" style="width:100%;padding:10px 12px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:0.95rem;background:#fafafa;">
+          <option value="estavel">Estável</option>
+          <option value="subindo">📈 Subindo (últimos 30d > média)</option>
+          <option value="caindo">📉 Caindo</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Produto idêntico ao seu?</label>
+        <select id="identico" onchange="calcular()" style="width:100%;padding:10px 12px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:0.95rem;background:#fafafa;">
+          <option value="sim">✅ Sim, idêntico</option>
+          <option value="similar">⚠️ Similar (diferenças pequenas)</option>
+          <option value="nao">❌ Não</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- P2: Preço + Concorrentes -->
+  <div class="card">
+    <h2>💰 P2 — Preço Competitivo & Concorrentes</h2>
+
+    <div class="grid-3" style="margin-bottom:14px;">
+      <div class="field">
+        <label>Custo unitário (R$)</label>
+        <input type="number" id="custoUnit" placeholder="0,00" min="0" step="0.01" oninput="calcular()">
+      </div>
+      <div class="field">
+        <label>Comissão Shopee (%)</label>
+        <input type="number" id="comissao" value="20" min="0" max="30" step="0.5" oninput="calcular()">
+        <div class="hint">14% base + 6% frete grátis extra = 20%</div>
+      </div>
+      <div class="field">
+        <label>Taxa fixa por venda (R$)</label>
+        <input type="number" id="taxaFixa" value="4" min="0" step="0.01" oninput="calcular()">
+        <div class="hint">Shopee cobra R$4 fixo por pedido</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:20px;">
+      <div class="field">
+        <label>💹 Menor preço do mercado (R$)</label>
+        <input type="number" id="precoMercadoMin" placeholder="Ex: 19,94" min="0" step="0.01" oninput="calcular()">
+        <div class="hint">Menor preço com vendas na 1ª página da Shopee</div>
+      </div>
+      <div class="field">
+        <label>💹 Maior preço do mercado (R$)</label>
+        <input type="number" id="precoMercadoMax" placeholder="Ex: 29,85" min="0" step="0.01" oninput="calcular()">
+        <div class="hint">Maior preço com vendas na 1ª página da Shopee</div>
+      </div>
+    </div>
+    <div id="faixaPrecoIndicador" style="display:none;margin-bottom:20px;"></div>
+
+    <div class="section-title">Mapeamento de concorrentes (até 3)</div>
+    <div style="overflow-x:auto;">
+      <div class="competitor-row" style="margin-bottom:4px;">
+        <div class="competitor-label">Concorrente</div>
+        <div class="competitor-label">Preço 1x (R$)</div>
+        <div class="competitor-label">Vendas/mês</div>
+        <div class="competitor-label">Tem desconto?</div>
+      </div>
+      <div class="competitor-row" id="conc1">
+        <input type="text" placeholder="Nome / Link" id="c1nome">
+        <input type="number" placeholder="0,00" id="c1preco" min="0" step="0.01" oninput="calcular()">
+        <input type="number" placeholder="0" id="c1vendas" min="0" oninput="calcular()">
+        <select id="c1desc" onchange="calcular()" style="padding:10px 8px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:0.88rem;background:#fafafa;">
+          <option value="nao">❌ Não</option>
+          <option value="sim">✅ Sim</option>
+        </select>
+      </div>
+      <div class="competitor-row">
+        <input type="text" placeholder="Nome / Link" id="c2nome">
+        <input type="number" placeholder="0,00" id="c2preco" min="0" step="0.01" oninput="calcular()">
+        <input type="number" placeholder="0" id="c2vendas" min="0" oninput="calcular()">
+        <select id="c2desc" onchange="calcular()" style="padding:10px 8px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:0.88rem;background:#fafafa;">
+          <option value="nao">❌ Não</option>
+          <option value="sim">✅ Sim</option>
+        </select>
+      </div>
+      <div class="competitor-row">
+        <input type="text" placeholder="Nome / Link" id="c3nome">
+        <input type="number" placeholder="0,00" id="c3preco" min="0" step="0.01" oninput="calcular()">
+        <input type="number" placeholder="0" id="c3vendas" min="0" oninput="calcular()">
+        <select id="c3desc" onchange="calcular()" style="padding:10px 8px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:0.88rem;background:#fafafa;">
+          <option value="nao">❌ Não</option>
+          <option value="sim">✅ Sim</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Variações -->
+  <div class="card">
+    <h2>📊 Variações de Quantidade (Kit)</h2>
+    <p style="font-size:0.85rem;color:#888;margin-bottom:16px;">Baseado no custo unitário preenchido acima + preço de venda sugerido. Ajuste o preço de venda por variação conforme seus concorrentes.</p>
+    <div style="overflow-x:auto;">
+      <table class="variacoes-table">
+        <thead>
+          <tr>
+            <th>Variação</th>
+            <th>Custo Total</th>
+            <th>Preço de Venda (R$)</th>
+            <th>Margem Líquida</th>
+            <th>Posição no Mercado</th>
+            <th>Veredicto</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaVar">
+          <tr><td colspan="5" style="text-align:center;color:#ccc;padding:20px;">Preencha o custo unitário para ver as variações</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Score + Veredicto -->
+  <div class="card">
+    <h2>🏆 Score Final & Veredicto</h2>
+    <div class="score-box">
+      <div class="score-circle" id="scoreCircle">
+        <span id="scoreNum">—</span>
+        <small>/10</small>
+      </div>
+      <div class="criterios-list" id="criteriosList">
+        <div style="color:#ccc;font-size:0.88rem;">Preencha os dados para ver a análise</div>
+      </div>
+    </div>
+    <div class="veredicto veredicto-neutro" id="veredictoBox">Aguardando dados...</div>
+
+    <div class="btn-row" style="margin-top:20px;">
+      <button class="btn btn-primary" onclick="salvarHistorico()">💾 Salvar no Histórico</button>
+      <button class="btn btn-secondary" onclick="limparFormulario()">🗑️ Limpar</button>
+    </div>
+  </div>
+
+  <!-- Histórico -->
+  <div class="card">
+    <h2>📋 Histórico de Produtos Analisados</h2>
+    <div id="historicoContainer">
+      <div class="historico-vazio">Nenhum produto salvo ainda.</div>
+    </div>
+    <div style="margin-top:12px;">
+      <button class="btn btn-ghost" onclick="exportarHistorico()" id="btnExportar" style="display:none;font-size:0.85rem;padding:8px 16px;">📤 Exportar CSV</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── Variáveis de preço das variações (editáveis)
+const precoVar = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+// ─── Histórico (localStorage)
+let historico = JSON.parse(localStorage.getItem('validador3p_hist') || '[]');
+
+// ─── CÁLCULO PRINCIPAL ───────────────────────────────────────────
+function calcular() {
+  const custo = parseFloat(document.getElementById('custoUnit').value) || 0;
+  const comissao = parseFloat(document.getElementById('comissao').value) || 20;
+  const taxaFixa = parseFloat(document.getElementById('taxaFixa').value) || 4;
+  const vendasMes = parseInt(document.getElementById('vendasMes').value) || 0;
+  const tendencia = document.getElementById('tendencia').value;
+  const identico = document.getElementById('identico').value;
+  const precoMin = parseFloat(document.getElementById('precoMercadoMin').value) || 0;
+  const precoMax = parseFloat(document.getElementById('precoMercadoMax').value) || 0;
+
+  // Indicador de faixa de preço do mercado
+  const indicador = document.getElementById('faixaPrecoIndicador');
+  if (precoMin > 0 && precoMax > 0) {
+    indicador.style.display = 'block';
+    indicador.innerHTML = `
+      <div style="background:#f0f8ff;border:1.5px solid #b3d9ff;border-radius:10px;padding:12px 16px;">
+        <div style="font-size:0.78rem;font-weight:700;color:#1565c0;margin-bottom:6px;">📊 FAIXA DE PREÇO DO MERCADO (1ª página Shopee)</div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:0.85rem;">
+          <span style="color:#1a9e5c;font-weight:700;">Mín: R$${precoMin.toFixed(2)}</span>
+          <div style="flex:1;height:8px;background:linear-gradient(to right, #1a9e5c, #e67e00, #d32f2f);border-radius:4px;"></div>
+          <span style="color:#d32f2f;font-weight:700;">Máx: R$${precoMax.toFixed(2)}</span>
+        </div>
+        <div style="font-size:0.75rem;color:#666;margin-top:4px;">Fique entre esses valores. Quanto mais próximo do mínimo, mais competitivo.</div>
+      </div>`;
+  } else {
+    indicador.style.display = 'none';
+  }
+
+  // Preço médio dos concorrentes
+  const precos = [
+    parseFloat(document.getElementById('c1preco').value),
+    parseFloat(document.getElementById('c2preco').value),
+    parseFloat(document.getElementById('c3preco').value),
+  ].filter(p => !isNaN(p) && p > 0);
+  const precoMedioConc = precos.length ? precos.reduce((a,b)=>a+b,0)/precos.length : 0;
+
+  // Atualizar tabela de variações
+  atualizarVariacoes(custo, comissao, taxaFixa);
+
+  // Score
+  calcularScore(vendasMes, tendencia, identico, custo, comissao, taxaFixa, precoMedioConc);
+}
+
+// ─── VARIAÇÕES ────────────────────────────────────────────────────
+function atualizarVariacoes(custoUnit, comissao, taxaFixa) {
+  const tbody = document.getElementById('tabelaVar');
+  if (!custoUnit || custoUnit <= 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ccc;padding:20px;">Preencha o custo unitário para ver as variações</td></tr>';
+    return;
+  }
+
+  const custoEmb = 0.30;
+  const precoMin1 = parseFloat(document.getElementById('precoMercadoMin').value) || 0;
+  const precoMax1 = parseFloat(document.getElementById('precoMercadoMax').value) || 0;
+
+  let html = '';
+  for (let qty = 1; qty <= 5; qty++) {
+    const custoTotal = (custoUnit * qty) + custoEmb;
+    const inputId = `pv${qty}`;
+    const precoAtual = precoVar[qty] || 0;
+
+    let margemPct = 0;
+    let lucroReais = 0;
+    if (precoAtual > 0) {
+      const descontosPct = precoAtual * (comissao / 100);
+      const lucro = precoAtual - descontosPct - taxaFixa - custoTotal;
+      margemPct = (lucro / precoAtual) * 100;
+      lucroReais = lucro;
+    }
+
+    let badgeHtml = '<span class="badge" style="background:#f0f0f0;color:#aaa">—</span>';
+    if (precoAtual > 0) {
+      if (margemPct >= 8) badgeHtml = `<span class="badge badge-ok">✅ ${margemPct.toFixed(1)}% (R$${lucroReais.toFixed(2)})</span>`;
+      else if (margemPct >= 0) badgeHtml = `<span class="badge badge-warn">⚠️ ${margemPct.toFixed(1)}% (R$${lucroReais.toFixed(2)})</span>`;
+      else badgeHtml = `<span class="badge badge-fail">❌ ${margemPct.toFixed(1)}% (R$${lucroReais.toFixed(2)})</span>`;
+    }
+
+    // Preço mínimo rentável (8% de margem)
+    // precoVenda = (custoTotal + taxaFixa) / (1 - comissao/100 - 0.08)
+    const precoMinRentavel = ((custoTotal + taxaFixa) / (1 - comissao / 100 - 0.08)).toFixed(2);
+
+    // Posição no mercado
+    let posicaoHtml = '<span style="font-size:0.78rem;color:#ccc;">—</span>';
+    if (precoAtual > 0 && precoMin1 > 0 && precoMax1 > 0) {
+      const faixa = precoMax1 - precoMin1;
+      const posicao = faixa > 0 ? ((precoAtual - precoMin1) / faixa) * 100 : 50;
+      const clampedPos = Math.max(0, Math.min(100, posicao));
+      let posLabel, posColor;
+      if (precoAtual <= precoMin1) { posLabel = '🔥 Mais barato'; posColor = '#1a9e5c'; }
+      else if (precoAtual >= precoMax1) { posLabel = '⬆️ Acima do máximo'; posColor = '#d32f2f'; }
+      else if (clampedPos <= 30) { posLabel = '✅ Muito competitivo'; posColor = '#1a9e5c'; }
+      else if (clampedPos <= 60) { posLabel = '👍 Competitivo'; posColor = '#e67e00'; }
+      else { posLabel = '⚠️ Pouco competitivo'; posColor = '#d32f2f'; }
+
+      posicaoHtml = `
+        <div style="font-size:0.75rem;font-weight:700;color:${posColor};margin-bottom:4px;">${posLabel}</div>
+        <div style="background:#f0f0f0;border-radius:4px;height:6px;width:100px;position:relative;">
+          <div style="background:${posColor};width:${clampedPos}%;height:100%;border-radius:4px;"></div>
+        </div>
+        <div style="font-size:0.7rem;color:#aaa;margin-top:2px;">R$${precoMin1} ← → R$${precoMax1}</div>`;
+    } else if (precoMin1 > 0 || precoMax1 > 0) {
+      posicaoHtml = '<span style="font-size:0.75rem;color:#ccc;">Preencha min e máx</span>';
+    }
+
+    html += `
+      <tr>
+        <td><strong>${qty === 1 ? '1x (unit.)' : `Kit ${qty}x`}</strong></td>
+        <td>R$ ${custoTotal.toFixed(2)}<br><span style="font-size:0.72rem;color:#aaa;">+R$${taxaFixa.toFixed(2)} taxa</span></td>
+        <td>
+          <input type="number" id="${inputId}" value="${precoAtual || ''}"
+            placeholder="R$ ${precoMinRentavel}+" min="0" step="0.01"
+            style="width:110px;padding:6px 10px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:0.88rem;"
+            oninput="precoVar[${qty}]=parseFloat(this.value)||0;calcular()">
+          <div style="font-size:0.7rem;color:#aaa;margin-top:3px;">Mín. rentável: R$ ${precoMinRentavel}</div>
+        </td>
+        <td>${badgeHtml}</td>
+        <td>${posicaoHtml}</td>
+        <td></td>
+      </tr>`;
+  }
+  tbody.innerHTML = html;
+}
+
+// ─── SCORE ────────────────────────────────────────────────────────
+function calcularScore(vendasMes, tendencia, identico, custoUnit, comissao, taxaFixa, precoMedioConc) {
+  const criterios = [];
+  let pontos = 0;
+
+  // Critério 1: Demanda (P1) — até 3 pts
+  if (vendasMes >= 600) { pontos += 3; criterios.push({ ok: true, txt: `Demanda alta: ${vendasMes} vendas/mês` }); }
+  else if (vendasMes >= 300) { pontos += 2; criterios.push({ ok: 'warn', txt: `Demanda ok: ${vendasMes} vendas/mês (mín. 300)` }); }
+  else if (vendasMes > 0) { pontos += 0; criterios.push({ ok: false, txt: `Demanda baixa: ${vendasMes} vendas/mês (< 300)` }); }
+  else criterios.push({ ok: 'vazio', txt: 'Demanda: não informada' });
+
+  // Critério 2: Produto idêntico — até 2 pts
+  if (identico === 'sim') { pontos += 2; criterios.push({ ok: true, txt: 'Produto idêntico ao do fornecedor' }); }
+  else if (identico === 'similar') { pontos += 1; criterios.push({ ok: 'warn', txt: 'Produto similar (verifique especificações)' }); }
+  else { pontos += 0; criterios.push({ ok: false, txt: 'Produto não idêntico — risco de erro' }); }
+
+  // Critério 3: Tendência — até 1 pt
+  if (tendencia === 'subindo') { pontos += 1; criterios.push({ ok: true, txt: 'Tendência: em alta 📈' }); }
+  else if (tendencia === 'estavel') { pontos += 0.5; criterios.push({ ok: 'warn', txt: 'Tendência: estável' }); }
+  else { pontos += 0; criterios.push({ ok: false, txt: 'Tendência: caindo 📉' }); }
+
+  // Critério 4: Melhor margem das variações — até 4 pts
+  let melhorMargem = -Infinity;
+  const custoEmb = 0.30;
+  for (let qty = 1; qty <= 5; qty++) {
+    const pv = precoVar[qty] || 0;
+    if (pv > 0 && custoUnit > 0) {
+      const custoTotal = custoUnit * qty + custoEmb;
+      const descontos = pv * (comissao / 100);
+      const lucro = pv - descontos - taxaFixa - custoTotal;
+      const m = (lucro / pv) * 100;
+      if (m > melhorMargem) melhorMargem = m;
+    }
+  }
+  if (melhorMargem === -Infinity) {
+    criterios.push({ ok: 'vazio', txt: 'Margem: sem preço de venda informado' });
+  } else if (melhorMargem >= 20) { pontos += 4; criterios.push({ ok: true, txt: `Margem excelente: ${melhorMargem.toFixed(1)}% (≥20%)` }); }
+  else if (melhorMargem >= 8) { pontos += 2.5; criterios.push({ ok: true, txt: `Margem ok: ${melhorMargem.toFixed(1)}% (≥8%)` }); }
+  else if (melhorMargem >= 0) { pontos += 0.5; criterios.push({ ok: 'warn', txt: `Margem baixa: ${melhorMargem.toFixed(1)}% (< 8%)` }); }
+  else { pontos += 0; criterios.push({ ok: false, txt: `Margem negativa: ${melhorMargem.toFixed(1)}%` }); }
+
+  const score = Math.min(10, Math.round(pontos * 10) / 10);
+
+  // Renderizar score
+  const circle = document.getElementById('scoreCircle');
+  document.getElementById('scoreNum').textContent = score;
+
+  let corCircle, corBg;
+  if (score >= 7) { corCircle = '#1a9e5c'; corBg = '#e6f9f0'; }
+  else if (score >= 5) { corCircle = '#e67e00'; corBg = '#fff8e1'; }
+  else { corCircle = '#d32f2f'; corBg = '#fdecea'; }
+  circle.style.borderColor = corCircle;
+  circle.style.color = corCircle;
+  circle.style.background = corBg;
+
+  // Critérios
+  const list = document.getElementById('criteriosList');
+  list.innerHTML = criterios.map(c => {
+    const cor = c.ok === true ? '#1a9e5c' : c.ok === false ? '#d32f2f' : c.ok === 'warn' ? '#e67e00' : '#bbb';
+    const icone = c.ok === true ? '✅' : c.ok === false ? '❌' : c.ok === 'warn' ? '⚠️' : '○';
+    return `<div class="criterio-item"><span>${icone}</span> <span style="color:${cor}">${c.txt}</span></div>`;
+  }).join('');
+
+  // Veredicto
+  const vBox = document.getElementById('veredictoBox');
+  const temDados = vendasMes > 0 || custoUnit > 0;
+  if (!temDados) {
+    vBox.className = 'veredicto veredicto-neutro';
+    vBox.textContent = 'Aguardando dados...';
+  } else if (score >= 7) {
+    vBox.className = 'veredicto veredicto-aprovado';
+    vBox.textContent = `✅ PRODUTO APROVADO — Score ${score}/10. Vale anunciar!`;
+  } else if (score >= 5) {
+    vBox.className = 'veredicto veredicto-atencao';
+    vBox.textContent = `⚠️ ATENÇÃO — Score ${score}/10. Produto com ressalvas, revise os pontos em amarelo.`;
+  } else {
+    vBox.className = 'veredicto veredicto-reprovado';
+    vBox.textContent = `❌ REPROVADO — Score ${score}/10. Descarte e analise o próximo produto.`;
+  }
+
+  return { score, melhorMargem };
+}
+
+// ─── SALVAR HISTÓRICO ─────────────────────────────────────────────
+function salvarHistorico() {
+  const nome = document.getElementById('nomeProduto').value.trim();
+  const fornecedor = document.getElementById('nomeFornecedor').value.trim();
+  if (!nome) { alert('Preencha o nome do produto antes de salvar.'); return; }
+
+  const vendasMes = parseInt(document.getElementById('vendasMes').value) || 0;
+  const custoUnit = parseFloat(document.getElementById('custoUnit').value) || 0;
+  const comissao = parseFloat(document.getElementById('comissao').value) || 20;
+  const taxaFixa = parseFloat(document.getElementById('taxaFixa').value) || 4;
+  const tendencia = document.getElementById('tendencia').value;
+  const identico = document.getElementById('identico').value;
+
+  const custoEmb = 0.30;
+  let melhorMargem = null;
+  for (let qty = 1; qty <= 5; qty++) {
+    const pv = precoVar[qty] || 0;
+    if (pv > 0 && custoUnit > 0) {
+      const custoTotal = custoUnit * qty + custoEmb;
+      const descontos = pv * (comissao / 100);
+      const m = ((pv - descontos - taxaFixa - custoTotal) / pv) * 100;
+      if (melhorMargem === null || m > melhorMargem) melhorMargem = m;
+    }
+  }
+
+  // Recalcular score
+  const precoMedioConc = 0;
+  const res = calcularScore(vendasMes, tendencia, identico, custoUnit, comissao, taxaFixa, precoMedioConc);
+  const score = res.score;
+
+  const item = {
+    id: Date.now(),
+    nome,
+    fornecedor,
+    vendasMes,
+    custoUnit,
+    melhorMargem: melhorMargem !== null ? parseFloat(melhorMargem.toFixed(1)) : null,
+    score,
+    data: new Date().toLocaleDateString('pt-BR'),
+    veredicto: score >= 7 ? 'aprovado' : score >= 5 ? 'atencao' : 'reprovado'
+  };
+
+  historico.unshift(item);
+  localStorage.setItem('validador3p_hist', JSON.stringify(historico));
+  renderHistorico();
+}
+
+// ─── RENDERIZAR HISTÓRICO ─────────────────────────────────────────
+function renderHistorico() {
+  const container = document.getElementById('historicoContainer');
+  document.getElementById('btnExportar').style.display = historico.length ? 'inline-block' : 'none';
+
+  if (!historico.length) {
+    container.innerHTML = '<div class="historico-vazio">Nenhum produto salvo ainda.</div>';
+    return;
+  }
+
+  container.innerHTML = historico.map(item => {
+    const cor = item.score >= 7 ? '#1a9e5c' : item.score >= 5 ? '#e67e00' : '#d32f2f';
+    const bg = item.score >= 7 ? '#e6f9f0' : item.score >= 5 ? '#fff8e1' : '#fdecea';
+    const margStr = item.melhorMargem !== null ? `${item.melhorMargem}% margem` : 'sem margem';
+    return `
+      <div class="hist-item">
+        <div class="hist-score" style="background:${bg};color:${cor}">${item.score}</div>
+        <div style="flex:1">
+          <div class="hist-nome">${item.nome}</div>
+          <div class="hist-meta">${item.fornecedor ? item.fornecedor + ' · ' : ''}${item.vendasMes} vendas/mês · ${margStr} · ${item.data}</div>
+        </div>
+        <button class="hist-btn-del" onclick="deletarItem(${item.id})" title="Remover">✕</button>
+      </div>`;
+  }).join('');
+}
+
+function deletarItem(id) {
+  historico = historico.filter(i => i.id !== id);
+  localStorage.setItem('validador3p_hist', JSON.stringify(historico));
+  renderHistorico();
+}
+
+// ─── EXPORTAR CSV ─────────────────────────────────────────────────
+function exportarHistorico() {
+  const header = ['Produto','Fornecedor','Vendas/Mês','Custo Unit.','Melhor Margem (%)','Score','Veredicto','Data'];
+  const rows = historico.map(i => [
+    i.nome, i.fornecedor, i.vendasMes, i.custoUnit,
+    i.melhorMargem ?? '', i.score, i.veredicto, i.data
+  ]);
+  const csv = [header, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'validador3p_historico.csv'; a.click();
+}
+
+// ─── LIMPAR ───────────────────────────────────────────────────────
+function limparFormulario() {
+  ['nomeProduto','nomeFornecedor','vendasMes','custoUnit','precoMercadoMin','precoMercadoMax'].forEach(id => document.getElementById(id).value = '');
+  ['c1nome','c1preco','c1vendas','c2nome','c2preco','c2vendas','c3nome','c3preco','c3vendas'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('tendencia').value = 'estavel';
+  document.getElementById('identico').value = 'sim';
+  document.getElementById('comissao').value = '20';
+  document.getElementById('taxaFixa').value = '4';
+  for (let i = 1; i <= 5; i++) precoVar[i] = 0;
+  calcular();
+}
+
+// ─── PRÉ-PREENCHIMENTO VIA URL ────────────────────────────────────
+// Formato: ?produto=X&fornecedor=Y&c1nome=Z&c1preco=29.9&c1aval=4.6&c1desc=sim
+//          &c2nome=...&c2preco=...&c2aval=...&c2desc=...
+//          &c3nome=...&c3preco=...&c3aval=...&c3desc=...
+function carregarDaURL() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has('produto') && !params.has('c1nome')) return;
+
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+
+  set('nomeProduto', params.get('produto'));
+  set('nomeFornecedor', params.get('fornecedor'));
+  set('precoMercadoMin', params.get('precoMin'));
+  set('precoMercadoMax', params.get('precoMax'));
+
+  for (let i = 1; i <= 3; i++) {
+    set(`c${i}nome`,  params.get(`c${i}nome`));
+    set(`c${i}preco`, params.get(`c${i}preco`));
+    set(`c${i}vendas`,params.get(`c${i}vendas`));
+    const desc = document.getElementById(`c${i}desc`);
+    if (desc && params.get(`c${i}desc`)) desc.value = params.get(`c${i}desc`);
+  }
+
+  // Banner de confirmação
+  const banner = document.createElement('div');
+  banner.style.cssText = 'background:#fff3cd;border:1.5px solid #ffe082;color:#856404;padding:12px 20px;border-radius:10px;margin-bottom:20px;font-size:0.9rem;font-weight:600;';
+  banner.innerHTML = '✅ Dados da Shopee pré-preenchidos! Complete o <strong>custo unitário</strong> e as <strong>vendas/mês do Avante Pro</strong> para finalizar a análise.';
+  const container = document.querySelector('.container');
+  if (container) container.insertBefore(banner, container.firstChild);
+
+  calcular();
+}
+
+// Init
+renderHistorico();
+carregarDaURL();
+calcular();
+</script>
+</body>
+</html>
